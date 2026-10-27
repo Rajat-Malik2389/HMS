@@ -337,7 +337,7 @@ export const SignoffModal: React.FC<SignoffModalProps> = ({
                         onClick={handleAutoFillDoctorPin}
                         className="text-[10px] text-blue-600 dark:text-blue-400 hover:underline font-medium"
                       >
-                        (Demo PIN: {currentDoctor.pinCode})
+                        Authorize with provider badge PIN
                       </button>
                     </div>
                     <input

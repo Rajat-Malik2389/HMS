@@ -10,6 +10,7 @@ import { QueueManager } from './components/QueueManager';
 import { HandshakeIntakeModal } from './components/HandshakeIntakeModal';
 import { SignoffModal } from './components/SignoffModal';
 import { PatientDetailModal } from './components/PatientDetailModal';
+import { WelcomeGuideModal } from './components/WelcomeGuideModal';
 import { INITIAL_PATIENTS, DOCTORS } from './data/mockClinicalData';
 import { Doctor, Patient, PatientStatus, PriorityLevel, QueueFilterState, SignoffRecord } from './types';
 import { computeQueueMetrics, filterAndSortPatients } from './utils/trackerLogic';
@@ -32,13 +33,22 @@ export default function App() {
   // UI View Mode (List Table vs Kanban Board)
   const [viewMode, setViewMode] = useState<'list' | 'board'>('list');
 
-  // Modals
+  // Modals & First-Time User Welcome Guide
+  const [isWelcomeOpen, setIsWelcomeOpen] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('handshake_welcome_dismissed') !== 'true';
+    }
+    return true;
+  });
   const [isIntakeOpen, setIsIntakeOpen] = useState(false);
   const [selectedPatientForDetail, setSelectedPatientForDetail] = useState<Patient | null>(null);
   const [selectedPatientForSignoff, setSelectedPatientForSignoff] = useState<Patient | null>(null);
 
-  // Live Auto-Simulation
-  const [isSimulating, setIsSimulating] = useState(true);
+  const handleDismissWelcomeForever = (doNotShowAgain: boolean) => {
+    if (doNotShowAgain && typeof window !== 'undefined') {
+      localStorage.setItem('handshake_welcome_dismissed', 'true');
+    }
+  };
 
   // Toast Notification
   const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'info' } | null>(null);
@@ -58,25 +68,6 @@ export default function App() {
     () => filterAndSortPatients(patients, filters),
     [patients, filters]
   );
-
-  // Simulation timer: ticks wait times and simulates subtle clinical activity
-  useEffect(() => {
-    if (!isSimulating) return;
-    const interval = setInterval(() => {
-      setPatients((prev) =>
-        prev.map((p) => {
-          if (p.status !== 'discharged') {
-            return {
-              ...p,
-              waitTimeMinutes: (p.waitTimeMinutes || 0) + 1,
-            };
-          }
-          return p;
-        })
-      );
-    }, 45000); // every 45s simulated minute tick
-    return () => clearInterval(interval);
-  }, [isSimulating]);
 
   // Intake Completion Handler
   const handleCompleteIntake = (newPatient: Patient) => {
@@ -147,9 +138,7 @@ export default function App() {
       <Header
         urgentCount={metrics.urgentCount}
         onOpenIntake={() => setIsIntakeOpen(true)}
-        onResetDemoData={handleResetDemoData}
-        isSimulating={isSimulating}
-        onToggleSimulation={() => setIsSimulating((prev) => !prev)}
+        onOpenGuide={() => setIsWelcomeOpen(true)}
       />
 
       {/* Main Container */}
@@ -189,13 +178,24 @@ export default function App() {
         <footer className="pt-2 pb-6 text-center text-xs text-slate-400 font-mono flex flex-col sm:flex-row items-center justify-between border-t border-slate-200 dark:border-slate-800 gap-2">
           <div className="flex items-center gap-1.5">
             <ShieldCheck className="w-4 h-4 text-emerald-500" />
-            <span>Handshake Protocol: Compliant with Electronic Signatures in Global & National Commerce Act (E-SIGN)</span>
+            <span>HMS Protocol: Compliant with Electronic Signatures in Global & National Commerce Act (E-SIGN)</span>
           </div>
           <div>
             System Active: {patients.length} Total Registered Records
           </div>
         </footer>
       </main>
+
+      {/* First-time User Onboarding & Feature Welcome Guide */}
+      <WelcomeGuideModal
+        isOpen={isWelcomeOpen}
+        onClose={() => setIsWelcomeOpen(false)}
+        onStartIntake={() => {
+          setIsWelcomeOpen(false);
+          setIsIntakeOpen(true);
+        }}
+        onDismissForever={handleDismissWelcomeForever}
+      />
 
       {/* Modals */}
       <HandshakeIntakeModal

@@ -13,17 +13,13 @@ import {
 interface HeaderProps {
   urgentCount: number;
   onOpenIntake: () => void;
-  onResetDemoData: () => void;
-  isSimulating: boolean;
-  onToggleSimulation: () => void;
+  onOpenGuide: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   urgentCount,
   onOpenIntake,
-  onResetDemoData,
-  isSimulating,
-  onToggleSimulation,
+  onOpenGuide,
 }) => {
   const [currentTime, setCurrentTime] = useState<string>('');
 
@@ -31,11 +27,11 @@ export const Header: React.FC<HeaderProps> = ({
     const updateTime = () => {
       const now = new Date();
       setCurrentTime(
-        now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+        now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       );
     };
     updateTime();
-    const timer = setInterval(updateTime, 1000);
+    const timer = setInterval(updateTime, 30000);
     return () => clearInterval(timer);
   }, []);
 
@@ -51,18 +47,18 @@ export const Header: React.FC<HeaderProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-lg font-bold tracking-tight text-white flex items-center gap-1.5">
-                  HANDSHAKE
+                  HMS CARETRACKER
                   <span className="text-xs px-2 py-0.5 rounded font-mono font-medium bg-blue-500/20 text-blue-300 border border-blue-400/30">
-                    FLOW v2.4
+                    HMS v3.0
                   </span>
                 </h1>
                 <span className="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 <span className="hidden sm:inline-block text-[11px] font-mono text-emerald-400">
-                  SECURE LEDGER LIVE
+                  LEDGER ACTIVE
                 </span>
               </div>
               <p className="text-xs text-slate-400">
-                Emergency & Ambulatory Patient Flow • Two-Party Cryptographic Sign-Off
+                Hospital Management System • Patient Flow & Cryptographic Sign-Off
               </p>
             </div>
           </div>
@@ -72,7 +68,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Clock */}
             <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/60 text-xs text-slate-300 font-mono">
               <Clock className="w-3.5 h-3.5 text-blue-400" />
-              <span>{currentTime || '09:48:19'}</span>
+              <span>{currentTime || '10:15:00'}</span>
             </div>
 
             {/* High Priority Emergency Pill */}
@@ -88,31 +84,15 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             )}
 
-            {/* Live Auto-Simulation Toggle */}
+            {/* Welcome & System Guide Button */}
             <button
               type="button"
-              onClick={onToggleSimulation}
-              aria-label={isSimulating ? 'Pause live simulation' : 'Start live simulation'}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
-                isSimulating
-                  ? 'bg-indigo-900/60 border-indigo-700 text-indigo-200 hover:bg-indigo-900'
-                  : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-700'
-              }`}
+              onClick={onOpenGuide}
+              aria-label="Open system overview and welcome guide"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-medium transition-colors"
             >
-              <Sparkles className={`w-3.5 h-3.5 ${isSimulating ? 'text-amber-400 animate-spin' : 'text-slate-400'}`} />
-              <span className="hidden sm:inline">Simulate Live Flow:</span>
-              <span className="font-semibold">{isSimulating ? 'Active' : 'Paused'}</span>
-            </button>
-
-            {/* Reset Data Button */}
-            <button
-              type="button"
-              onClick={onResetDemoData}
-              title="Reset to default clinic demo data"
-              aria-label="Reset demo data"
-              className="p-1.5 rounded-lg bg-slate-800/80 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
-            >
-              <RefreshCw className="w-4 h-4" />
+              <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+              <span>Guide & Features</span>
             </button>
 
             {/* Check-In / Intake CTA Button */}

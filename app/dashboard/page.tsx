@@ -269,13 +269,13 @@ export default function DashboardPage() {
             </div>
             <div>
               <h1 className="text-lg font-bold tracking-tight text-white flex items-center gap-2">
-                Handshake CareTracker
+                HMS CareTracker
                 <span className="text-[10px] px-2 py-0.5 rounded font-mono font-medium bg-blue-500/20 text-blue-300 border border-blue-400/30">
-                  HIPAA-SECURE
+                  HMS v3.0
                 </span>
               </h1>
               <p className="text-xs text-slate-400">
-                Patient Flow & Two-Party Cryptographic Sign-Off Engine
+                Hospital Management System • Patient Flow & Cryptographic Sign-Off
               </p>
             </div>
           </div>

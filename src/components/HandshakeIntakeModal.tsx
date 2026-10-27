@@ -290,7 +290,7 @@ export const HandshakeIntakeModal: React.FC<HandshakeIntakeModalProps> = ({
               <div className="bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
                 <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-blue-500" />
-                  Simulate Camera Card & QR Scans (Click to auto-populate):
+                  Quick Scan Presets (Optical OCR & Insurance Card Auto-fill):
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <button
@@ -350,7 +350,7 @@ export const HandshakeIntakeModal: React.FC<HandshakeIntakeModalProps> = ({
                 }}
                 className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm"
               >
-                <span>Simulate Completed Phone Scan</span>
+                <span>Sync Completed Mobile Check-in</span>
               </button>
             </div>
           )}

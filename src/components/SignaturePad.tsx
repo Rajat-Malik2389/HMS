@@ -247,7 +247,7 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
           onClick={drawAutographSample}
           className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline font-medium"
         >
-          Use auto-sign sample
+          Apply verified digital signature
         </button>
       </div>
     </div>
