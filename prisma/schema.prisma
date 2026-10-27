@@ -1,0 +1,160 @@
+// prisma/schema.prisma
+// HIPAA/GDPR Compliant Patient Tracking & Cryptographic Digital Sign-Off Data Model
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum VisitStatus {
+  CHECKED_IN
+  TRIAGE
+  IN_CONSULTATION
+  PENDING_HANDSHAKE
+  DISCHARGED
+}
+
+enum PriorityLevel {
+  URGENT
+  NORMAL
+  LOW
+}
+
+enum TriageTag {
+  RED       // Immediate / Resuscitation
+  YELLOW    // Urgent
+  GREEN     // Standard / Delayed
+  BLUE      // Non-urgent
+}
+
+enum AuditAction {
+  VISIT_CREATED
+  TRIAGE_COMPLETED
+  DOCTOR_ASSIGNED
+  STATUS_UPDATED
+  HANDSHAKE_INITIATED
+  HANDSHAKE_COMPLETED
+  DISCHARGE_SEALED
+  RECORD_ACCESSED
+}
+
+model Patient {
+  id               String         @id @default(uuid())
+  mrn              String         @unique // Medical Record Number
+  firstName        String
+  lastName         String
+  dateOfBirth      DateTime
+  gender           String
+  phone            String?
+  email            String?
+  emergencyContact String?
+  consentSigned    Boolean        @default(false)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  visits           PatientVisit[]
+  handshakes       DigitalHandshake[]
+  auditLogs        AuditLog[]
+
+  @@index([mrn])
+  @@index([lastName, firstName])
+}
+
+model PatientVisit {
+  id                     String            @id @default(uuid())
+  patientId              String
+  visitNumber            String            @unique // e.g. "VST-2026-90412"
+  status                 VisitStatus       @default(CHECKED_IN)
+  priority               PriorityLevel     @default(NORMAL)
+  triageTag              TriageTag         @default(GREEN)
+  chiefComplaint         String
+  department             String
+  
+  // Triage Vitals
+  vitalsBp               String?           // Blood Pressure e.g. "120/80"
+  vitalsHeartRate        Int?              // bpm
+  vitalsSpo2             Int?              // percentage
+  vitalsTemp             Float?            // degrees Fahrenheit
+  vitalsPainScore        Int?              // 1-10
+
+  // Attending Clinical Team
+  attendingDoctorId      String?
+  attendingDoctorName    String?
+  attendingDoctorLicense String?
+  
+  // Handshake Token for two-party authorization
+  handshakeToken         String            // e.g. "HSK-4819"
+
+  checkInTime            DateTime          @default(now())
+  dischargeTime          DateTime?
+  notes                  String?
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
+
+  // Relationships
+  patient                Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  digitalHandshake       DigitalHandshake?
+  auditLogs              AuditLog[]
+
+  @@index([patientId])
+  @@index([status])
+  @@index([priority])
+  @@index([checkInTime])
+}
+
+model DigitalHandshake {
+  id                    String        @id @default(uuid())
+  visitId               String        @unique
+  patientId             String
+  doctorId              String
+  doctorName            String
+  doctorLicense         String
+  patientToken          String
+  
+  // Signatures (Base64 SVG or PNG data URI)
+  doctorSignatureData   String        @db.Text
+  patientSignatureData  String        @db.Text
+
+  // Cryptographic Ledger Verification
+  cryptographicHash     String        @unique // SHA-256 Digest
+  verifiedTwoParty      Boolean       @default(true)
+  clinicalSummary       String        @db.Text
+  prescriptions         String[]      // List of e-prescription directives
+  dischargeInstructions String        @db.Text
+  
+  signedAt              DateTime      @default(now())
+  createdAt             DateTime      @default(now())
+
+  // Relationships
+  visit                 PatientVisit  @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  patient               Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([visitId])
+  @@index([cryptographicHash])
+}
+
+model AuditLog {
+  id          String        @id @default(uuid())
+  visitId     String?
+  patientId   String?
+  actorId     String        // Provider or system user ID
+  actorRole   String        // e.g. "ATTENDING_PHYSICIAN", "TRIAGE_NURSE"
+  action      AuditAction
+  description String
+  ipAddress   String?
+  userAgent   String?
+  checksum    String        // Tamper-evident checksum
+  timestamp   DateTime      @default(now())
+
+  visit       PatientVisit? @relation(fields: [visitId], references: [id], onDelete: SetNull)
+  patient     Patient?      @relation(fields: [patientId], references: [id], onDelete: SetNull)
+
+  @@index([visitId])
+  @@index([patientId])
+  @@index([action])
+  @@index([timestamp])
+}

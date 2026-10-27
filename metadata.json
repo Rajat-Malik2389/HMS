@@ -1,0 +1,6 @@
+{
+  "name": "Handshake Patient Tracker & Digital Sign-off",
+  "description": "Real-time clinical queue management, digital handshake check-in intake, and two-party cryptographic doctor-patient sign-off system.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
